@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wordle — GameHub</title>
+  <style>
+    :root {
+      --bg-base: #060913;
+      --green: #10b981;
+      --yellow: #f59e0b;
+      --gray: #334155;
+      --empty: rgba(255, 255, 255, 0.08);
+      --border: rgba(255, 255, 255, 0.15);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      background: var(--bg-base);
+      color: var(--text-main);
+      font-family: system-ui, -apple-system, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1.5rem 1rem;
+      background-image: radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.12) 0%, transparent 40%);
+    }
+    .back-nav { width: 100%; max-width: 500px; margin-bottom: 1rem; }
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      color: var(--text-muted); text-decoration: none; font-size: 0.875rem; font-weight: 600;
+      padding: 0.4rem 0.8rem; border-radius: 0.5rem; background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border); transition: all 0.2s;
+    }
+    .back-btn:hover { color: #fff; border-color: var(--green); }
+    h1 { font-size: 1.75rem; color: #34d399; margin-bottom: 0.25rem; }
+    p.sub { color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.25rem; }
+    .grid { display: grid; grid-template-rows: repeat(6, 1fr); gap: 6px; margin-bottom: 1.5rem; }
+    .row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+    .tile {
+      width: 52px; height: 52px; border: 2px solid var(--empty);
+      border-radius: 6px; display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; font-weight: 800; text-transform: uppercase; user-select: none;
+      transition: all 0.2s;
+    }
+    .tile.filled { border-color: rgba(255,255,255,0.4); }
+    .tile.correct { background: var(--green); border-color: var(--green); color: #fff; }
+    .tile.present { background: var(--yellow); border-color: var(--yellow); color: #fff; }
+    .tile.absent { background: var(--gray); border-color: var(--gray); color: #94a3b8; }
+    .keyboard { display: flex; flex-direction: column; gap: 6px; width: 100%; max-width: 480px; }
+    .kb-row { display: flex; justify-content: center; gap: 5px; }
+    .key {
+      padding: 0.75rem 0.6rem; border-radius: 6px; background: rgba(255,255,255,0.08);
+      border: 1px solid var(--border); color: #fff; font-weight: 700; font-size: 0.8125rem;
+      cursor: pointer; user-select: none; min-width: 32px; text-align: center;
+    }
+    .key.wide { min-width: 54px; }
+    .key.correct { background: var(--green); }
+    .key.present { background: var(--yellow); }
+    .key.absent { background: #1e293b; color: #64748b; }
+    .toast {
+      position: fixed; top: 1.5rem; padding: 0.6rem 1.2rem; background: #fff;
+      color: #000; border-radius: 9999px; font-weight: 700; font-size: 0.875rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5); opacity: 0; pointer-events: none;
+      transition: opacity 0.2s ease; z-index: 100;
+    }
+    .toast.show { opacity: 1; }
+    canvas#confetti { position: fixed; inset: 0; pointer-events: none; z-index: 9999; }
+  </style>
+</head>
+<body>
+  <canvas id="confetti"></canvas>
+  <div class="toast" id="toast"></div>
+
+  <nav class="back-nav">
+    <a href="../../index.html" class="back-btn">← Back to GameHub</a>
+  </nav>
+
+  <h1>🔤 Wordle</h1>
+  <p class="sub">Guess the 5-letter word in 6 attempts</p>
+
+  <div class="grid" id="grid"></div>
+  <div class="keyboard" id="keyboard"></div>
+
+  <script>
+    const WORDS = ['CRANE','AUDIO','ADIEU','ROATE','SALET','STARE','PLANT','GHOST','SMART','BRAIN','LIGHT','SPACE','CLOUD','FLASH','DREAM','POWER','TIGER','EAGLE','MUSIC','RIVER','SMILE','FLAME','MAGIC','SWORD','OCEAN','HONEY','STORM','STONE','PEACH','WATER','WORLD','NIGHT','HOUSE','TABLE','CHAIR','BEACH','EARTH','PIZZA','CHESS','TRAIN','CLOCK','SUGAR','MONEY','FRUIT','BREAD','LEMON','APPLE','GRAPE','MANGO','BERRY','CANDY','SPICE','PILOT','STAMP','CROWN','JEWEL','RADIO','LASER','ROBOT','SOLAR','LUNAR','STARS','COMET','ORBIT','RADAR'];
+    let target = WORDS[Math.floor(Math.random() * WORDS.length)];
+    let guesses = [];
+    let current = '';
+    let gameOver = false;
+
+    const gridEl = document.getElementById('grid');
+    for (let r = 0; r < 6; r++) {
+      const row = document.createElement('div');
+      row.className = 'row';
+      for (let c = 0; c < 5; c++) {
+        const t = document.createElement('div');
+        t.className = 'tile';
+        t.id = `t-${r}-${c}`;
+        row.appendChild(t);
+      }
+      gridEl.appendChild(row);
+    }
+
+    const KEYS = [
+      ['Q','W','E','R','T','Y','U','I','O','P'],
+      ['A','S','D','F','G','H','J','K','L'],
+      ['ENTER','Z','X','C','V','B','N','M','⌫']
+    ];
+    const kbEl = document.getElementById('keyboard');
+    KEYS.forEach(row => {
+      const r = document.createElement('div');
+      r.className = 'kb-row';
+      row.forEach(k => {
+        const b = document.createElement('button');
+        b.className = 'key' + (k.length > 1 ? ' wide' : '');
+        b.textContent = k;
+        b.dataset.key = k;
+        b.onclick = () => handleKey(k);
+        r.appendChild(b);
+      });
+      kbEl.appendChild(r);
+    });
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2000);
+    }
+
+    function fireConfetti() {
+      const cvs = document.getElementById('confetti');
+      const ctx = cvs.getContext('2d');
+      cvs.width = window.innerWidth; cvs.height = window.innerHeight;
+      const particles = Array.from({ length: 140 }, () => ({
+        x: cvs.width * 0.5, y: cvs.height * 0.4,
+        vx: (Math.random() - 0.5) * 18, vy: Math.random() * -14 - 4,
+        size: Math.random() * 8 + 5,
+        color: ['#10b981', '#34d399', '#fbbf24', '#38bdf8', '#c084fc'][Math.floor(Math.random()*5)],
+        rot: Math.random() * 360, vr: (Math.random() - 0.5) * 10
+      }));
+      const start = performance.now();
+      function render(now) {
+        const el = now - start;
+        if (el >= 3000) { ctx.clearRect(0,0,cvs.width,cvs.height); return; }
+        ctx.clearRect(0,0,cvs.width,cvs.height);
+        ctx.globalAlpha = el > 2300 ? (3000 - el)/700 : 1;
+        particles.forEach(p => {
+          p.x += p.vx; p.y += p.vy; p.vy += 0.4; p.rot += p.vr;
+          ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot*Math.PI/180);
+          ctx.fillStyle = p.color; ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
+          ctx.restore();
+        });
+        requestAnimationFrame(render);
+      }
+      requestAnimationFrame(render);
+    }
+
+    function updateGrid() {
+      for (let r = 0; r < 6; r++) {
+        for (let c = 0; c < 5; c++) {
+          const t = document.getElementById(`t-${r}-${c}`);
+          if (r < guesses.length) {
+            t.textContent = guesses[r][c].char;
+            t.className = 'tile ' + guesses[r][c].state;
+          } else if (r === guesses.length) {
+            t.textContent = current[c] || '';
+            t.className = 'tile' + (current[c] ? ' filled' : '');
+          } else {
+            t.textContent = '';
+            t.className = 'tile';
+          }
+        }
+      }
+    }
+
+    function handleKey(key) {
+      if (gameOver) return;
+      if (key === 'ENTER') {
+        if (current.length !== 5) { showToast('Not enough letters'); return; }
+        const rowRes = [];
+        const targetArr = target.split('');
+        const used = [false, false, false, false, false];
+        for (let i = 0; i < 5; i++) {
+          if (current[i] === target[i]) {
+            rowRes[i] = { char: current[i], state: 'correct' };
+            used[i] = true;
+          }
+        }
+        for (let i = 0; i < 5; i++) {
+          if (rowRes[i]) continue;
+          let match = false;
+          for (let j = 0; j < 5; j++) {
+            if (!used[j] && current[i] === targetArr[j]) {
+              used[j] = true; match = true; break;
+            }
+          }
+          rowRes[i] = { char: current[i], state: match ? 'present' : 'absent' };
+        }
+
+        rowRes.forEach(({ char, state }) => {
+          const btn = document.querySelector(`button[data-key="${char}"]`);
+          if (btn && !btn.classList.contains('correct')) {
+            btn.className = 'key ' + state;
+          }
+        });
+
+        guesses.push(rowRes);
+        const won = current === target;
+        current = '';
+        updateGrid();
+
+        if (won) {
+          gameOver = true;
+          showToast('🎉 Brilliant! Solved!');
+          fireConfetti();
+        } else if (guesses.length === 6) {
+          gameOver = true;
+          showToast(`Game Over! Word was ${target}`);
+        }
+      } else if (key === '⌫' || key === 'BACKSPACE') {
+        current = current.slice(0, -1);
+        updateGrid();
+      } else if (/^[A-Z]$/.test(key) && current.length < 5) {
+        current += key;
+        updateGrid();
+      }
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handleKey('ENTER');
+      else if (e.key === 'Backspace') handleKey('⌫');
+      else if (/^[a-zA-Z]$/.test(e.key)) handleKey(e.key.toUpperCase());
+    });
+  </script>
+</body>
+</html>

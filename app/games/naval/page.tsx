@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Confetti from '@/app/components/Confetti';
 
 const GRID = 10;
 
@@ -326,6 +327,7 @@ export default function NavalPage() {
 
   return (
     <main className="game-page">
+      <Confetti active={phase === 'gameover' && winner === 'player'} duration={3000} />
       <div className="game-page-header">
         <Link href="/" className="game-page-back">← Back to Games</Link>
         <h1 className="game-page-title" style={{ color: 'var(--pink-light)' }}>

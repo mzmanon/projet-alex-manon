@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Naval Battle — GameHub</title>
+  <style>
+    :root {
+      --bg-base: #060913;
+      --border: rgba(255, 255, 255, 0.15);
+      --pink: #ec4899;
+      --pink-light: #f472b6;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      background: var(--bg-base);
+      color: var(--text-main);
+      font-family: system-ui, -apple-system, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1.5rem 1rem;
+      background-image: radial-gradient(circle at 70% 30%, rgba(236, 72, 153, 0.12) 0%, transparent 40%);
+    }
+    .back-nav { width: 100%; max-width: 820px; margin-bottom: 1rem; }
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      color: var(--text-muted); text-decoration: none; font-size: 0.875rem; font-weight: 600;
+      padding: 0.4rem 0.8rem; border-radius: 0.5rem; background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border); transition: all 0.2s;
+    }
+    .back-btn:hover { color: #fff; border-color: var(--pink); }
+    h1 { font-size: 1.75rem; color: var(--pink-light); margin-bottom: 0.25rem; }
+    p.sub { color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.25rem; text-align: center; }
+    .boards-container {
+      display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center; margin-bottom: 1.5rem;
+    }
+    .board-card {
+      background: rgba(15, 20, 35, 0.85); border: 1px solid var(--border);
+      border-radius: 1rem; padding: 1.25rem; text-align: center;
+    }
+    .board-card h3 { font-size: 1rem; margin-bottom: 0.75rem; color: #fff; }
+    .grid {
+      display: grid; grid-template-columns: repeat(10, 26px); grid-template-rows: repeat(10, 26px);
+      gap: 3px; background: rgba(0,0,0,0.4); padding: 4px; border-radius: 0.5rem;
+    }
+    .cell {
+      background: rgba(255, 255, 255, 0.05); border-radius: 3px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; font-size: 12px;
+      user-select: none; transition: background 0.15s;
+    }
+    .cell.ship { background: rgba(139, 92, 246, 0.4); }
+    .cell.hit { background: #ef4444 !important; color: #fff; }
+    .cell.miss { background: #3b82f6 !important; }
+    .cell.sunk { background: #991b1b !important; color: #fff; }
+    .cell:hover:not(.hit):not(.miss):not(.sunk) { background: rgba(236, 72, 153, 0.25); }
+    .status-box {
+      font-weight: 700; font-size: 1rem; margin-bottom: 1rem; color: var(--pink-light);
+    }
+    .controls { display: flex; gap: 0.75rem; }
+    .btn {
+      padding: 0.5rem 1.2rem; border-radius: 0.5rem; border: 1px solid var(--border);
+      background: rgba(255,255,255,0.08); color: #fff; font-weight: 700; cursor: pointer;
+    }
+    .btn:hover { background: rgba(236, 72, 153, 0.2); border-color: var(--pink); }
+    canvas#confetti { position: fixed; inset: 0; pointer-events: none; z-index: 9999; }
+  </style>
+</head>
+<body>
+  <canvas id="confetti"></canvas>
+
+  <nav class="back-nav">
+    <a href="../../index.html" class="back-btn">← Back to GameHub</a>
+  </nav>
+
+  <h1>🚢 Naval Battle</h1>
+  <p class="sub">Fire missiles at the enemy fleet and sink all their ships</p>
+
+  <div class="status-box" id="status">Click on the Enemy Radar to fire!</div>
+
+  <div class="boards-container">
+    <div class="board-card">
+      <h3>🎯 Enemy Radar (Target Here)</h3>
+      <div class="grid" id="enemyGrid"></div>
+    </div>
+    <div class="board-card">
+      <h3>🛡️ Your Fleet</h3>
+      <div class="grid" id="playerGrid"></div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="btn" id="newGameBtn">New Fleet Battle</button>
+  </div>
+
+  <script>
+    const GRID = 10;
+    const SHIPS = [5, 4, 3, 3, 2];
+    let playerShips = [], enemyShips = [];
+    let playerHits = new Set(), enemyHits = new Set();
+    let gameOver = false;
+
+    function fireConfetti() {
+      const cvs = document.getElementById('confetti');
+      const ctx = cvs.getContext('2d');
+      cvs.width = window.innerWidth; cvs.height = window.innerHeight;
+      const particles = Array.from({ length: 140 }, () => ({
+        x: cvs.width * 0.5, y: cvs.height * 0.4,
+        vx: (Math.random() - 0.5) * 16, vy: Math.random() * -14 - 4,
+        size: Math.random() * 8 + 5,
+        color: ['#ec4899', '#f472b6', '#06b6d4', '#fbbf24', '#ffffff'][Math.floor(Math.random()*5)],
+        rot: Math.random() * 360, vr: (Math.random() - 0.5) * 10
+      }));
+      const start = performance.now();
+      function render(now) {
+        const el = now - start;
+        if (el >= 3000) { ctx.clearRect(0,0,cvs.width,cvs.height); return; }
+        ctx.clearRect(0,0,cvs.width,cvs.height);
+        ctx.globalAlpha = el > 2300 ? (3000 - el)/700 : 1;
+        particles.forEach(p => {
+          p.x += p.vx; p.y += p.vy; p.vy += 0.4; p.rot += p.vr;
+          ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot*Math.PI/180);
+          ctx.fillStyle = p.color; ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
+          ctx.restore();
+        });
+        requestAnimationFrame(render);
+      }
+      requestAnimationFrame(render);
+    }
+
+    function placeShips() {
+      const occupied = new Set();
+      const ships = [];
+      SHIPS.forEach(size => {
+        let placed = false, attempts = 0;
+        while (!placed && attempts++ < 200) {
+          const horiz = Math.random() > 0.5;
+          const r = Math.floor(Math.random() * (horiz ? GRID : GRID - size + 1));
+          const c = Math.floor(Math.random() * (horiz ? GRID - size + 1 : GRID));
+          const cells = [];
+          for (let i = 0; i < size; i++) cells.push(`${horiz ? r : r + i},${horiz ? c + i : c}`);
+          if (cells.every(k => !occupied.has(k))) {
+            cells.forEach(k => occupied.add(k));
+            ships.push(cells);
+            placed = true;
+          }
+        }
+      });
+      return ships;
+    }
+
+    function init() {
+      playerShips = placeShips();
+      enemyShips = placeShips();
+      playerHits.clear();
+      enemyHits.clear();
+      gameOver = false;
+      document.getElementById('status').textContent = 'Click on the Enemy Radar to fire!';
+      render();
+    }
+
+    function render() {
+      const eg = document.getElementById('enemyGrid');
+      const pg = document.getElementById('playerGrid');
+      eg.innerHTML = ''; pg.innerHTML = '';
+
+      const enemyFlattened = new Set(enemyShips.flat());
+      const playerFlattened = new Set(playerShips.flat());
+
+      for (let r = 0; r < GRID; r++) {
+        for (let c = 0; c < GRID; c++) {
+          const key = `${r},${c}`;
+          // Enemy
+          const ec = document.createElement('div');
+          ec.className = 'cell';
+          if (playerHits.has(key)) {
+            ec.className += enemyFlattened.has(key) ? ' hit' : ' miss';
+            ec.textContent = enemyFlattened.has(key) ? '🔥' : '•';
+          }
+          ec.onclick = () => onShoot(r, c);
+          eg.appendChild(ec);
+
+          // Player
+          const pc = document.createElement('div');
+          pc.className = 'cell';
+          if (playerFlattened.has(key)) pc.className += ' ship';
+          if (enemyHits.has(key)) {
+            pc.className += playerFlattened.has(key) ? ' hit' : ' miss';
+            pc.textContent = playerFlattened.has(key) ? '🔥' : '•';
+          }
+          pg.appendChild(pc);
+        }
+      }
+    }
+
+    function onShoot(r, c) {
+      if (gameOver) return;
+      const key = `${r},${c}`;
+      if (playerHits.has(key)) return;
+      playerHits.add(key);
+
+      const allEnemyCells = enemyShips.flat();
+      if (allEnemyCells.every(k => playerHits.has(k))) {
+        gameOver = true;
+        document.getElementById('status').textContent = '🏆 Victory! You sunk the entire enemy fleet!';
+        fireConfetti();
+        render();
+        return;
+      }
+
+      // AI shot
+      let ar, ac, akey;
+      do {
+        ar = Math.floor(Math.random() * GRID);
+        ac = Math.floor(Math.random() * GRID);
+        akey = `${ar},${ac}`;
+      } while (enemyHits.has(akey));
+      enemyHits.add(akey);
+
+      const allPlayerCells = playerShips.flat();
+      if (allPlayerCells.every(k => enemyHits.has(k))) {
+        gameOver = true;
+        document.getElementById('status').textContent = '💀 Defeat! Your fleet has been sunk!';
+      } else {
+        document.getElementById('status').textContent = 'Firing missiles...';
+      }
+      render();
+    }
+
+    document.getElementById('newGameBtn').onclick = init;
+    init();
+  </script>
+</body>
+</html>

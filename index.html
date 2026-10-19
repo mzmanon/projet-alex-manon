@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GameHub — Play Classic Mini Games</title>
+  <meta name="description" content="Play Tic Tac Toe, Wordle, Chess, and Naval Battle in your browser for free." />
+  
+  <style>
+    /* ==========================================================================
+       GameHub Design System & Critical CSS (Zero CDN Dependencies)
+       ========================================================================== */
+    :root {
+      --bg-base: #060913;
+      --bg-surface: #0c1222;
+      --bg-card: rgba(255, 255, 255, 0.04);
+      --bg-card-hover: rgba(255, 255, 255, 0.08);
+      --border-subtle: rgba(255, 255, 255, 0.09);
+      --border-highlight: rgba(255, 255, 255, 0.18);
+
+      --color-purple: #8b5cf6;
+      --color-purple-light: #c084fc;
+      --color-green: #10b981;
+      --color-green-light: #34d399;
+      --color-blue: #06b6d4;
+      --color-blue-light: #38bdf8;
+      --color-pink: #ec4899;
+      --color-pink-light: #f472b6;
+
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-subtle: #64748b;
+
+      --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      min-height: 100vh;
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Ambient Background Glow */
+    body {
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(139, 92, 246, 0.12) 0%, transparent 45%),
+        radial-gradient(circle at 85% 80%, rgba(6, 182, 212, 0.10) 0%, transparent 45%);
+      background-attachment: fixed;
+    }
+
+    /* Focus States for Accessibility */
+    a:focus-visible, button:focus-visible {
+      outline: 2px solid var(--color-purple-light);
+      outline-offset: 3px;
+    }
+
+    /* ==========================================================================
+       Navigation Bar
+       ========================================================================== */
+    .site-nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(8, 12, 24, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .nav-inner {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 0.875rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    .brand-logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .brand-icon {
+      width: 2.25rem;
+      height: 2.25rem;
+      background: linear-gradient(135deg, var(--color-purple), var(--color-blue));
+      border-radius: 0.625rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      box-shadow: 0 0 16px rgba(139, 92, 246, 0.4);
+    }
+
+    .brand-name {
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, var(--color-purple-light), var(--color-blue-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-divider {
+      width: 1px;
+      height: 1.5rem;
+      background: var(--border-subtle);
+    }
+
+    /* Top-Left Menu Trigger Button */
+    .menu-trigger-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.45rem 0.9rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      border-radius: 9999px;
+      color: var(--text-main);
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .menu-trigger-btn:hover {
+      background: rgba(139, 92, 246, 0.15);
+      border-color: rgba(139, 92, 246, 0.4);
+      color: #fff;
+      box-shadow: 0 0 14px rgba(139, 92, 246, 0.25);
+    }
+
+    .menu-trigger-btn.is-active {
+      background: rgba(139, 92, 246, 0.25);
+      border-color: var(--color-purple);
+      color: #fff;
+    }
+
+    .trigger-chevron {
+      transition: transform 0.2s ease;
+    }
+
+    .menu-trigger-btn.is-active .trigger-chevron {
+      transform: rotate(180deg);
+    }
+
+    /* Right Slot: User Avatar */
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .user-avatar-btn {
+      width: 2.25rem;
+      height: 2.25rem;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .user-avatar-btn:hover {
+      transform: scale(1.06);
+      border-color: var(--color-purple-light);
+    }
+
+    /* ==========================================================================
+       Main Hero & Hub Header
+       ========================================================================== */
+    .hub-container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 5rem;
+    }
+
+    .hub-header {
+      margin-bottom: 2.5rem;
+    }
+
+    .header-badge-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .badge-count {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      background: rgba(139, 92, 246, 0.15);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      color: var(--color-purple-light);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .badge-live {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      color: var(--color-green-light);
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .live-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--color-green);
+      box-shadow: 0 0 6px var(--color-green);
+    }
+
+    .hub-title {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(180deg, #ffffff 0%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hub-subtitle {
+      font-size: clamp(1rem, 1.5vw, 1.125rem);
+      color: var(--text-muted);
+      max-width: 600px;
+    }
+
+    /* ==========================================================================
+       Responsive Game Cards Grid
+       - Mobile (<=640px): 1 column
+       - Tablet (641px - 1024px): 2 columns
+       - Desktop (>=1025px): 2 to 4 columns
+       ========================================================================== */
+    .games-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+
+    @media (min-width: 641px) {
+      .games-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+      }
+    }
+
+    @media (min-width: 1025px) {
+      .games-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
+      }
+    }
+
+    /* Game Card */
+    .game-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 1.5rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 1.125rem;
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                  background 0.2s ease,
+                  border-color 0.2s ease,
+                  box-shadow 0.25s ease;
+      overflow: hidden;
+    }
+
+    .game-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--card-accent);
+      opacity: 0.8;
+      transition: opacity 0.2s ease;
+    }
+
+    .game-card:hover {
+      transform: translateY(-4px);
+      background: var(--bg-card-hover);
+      border-color: var(--card-accent);
+      box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.7),
+                  0 0 24px -6px var(--card-glow);
+    }
+
+    .game-card:hover::before {
+      opacity: 1;
+    }
+
+    /* Top row of card */
+    .card-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .card-icon-square {
+      width: 3.25rem;
+      height: 3.25rem;
+      border-radius: 0.875rem;
+      background: var(--card-glow);
+      color: var(--card-accent-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+      transition: transform 0.25s ease;
+    }
+
+    .game-card:hover .card-icon-square {
+      transform: scale(1.08);
+    }
+
+    .card-tag {
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.25rem 0.55rem;
+      border-radius: 0.375rem;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-muted);
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* Middle info */
+    .card-content {
+      margin-bottom: 1.5rem;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.4rem;
+      color: #fff;
+    }
+
+    .card-description {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    /* Card Footer Row */
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .player-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .play-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.8125rem;
+      font-weight: 700;
+      color: var(--card-accent-light);
+      transition: gap 0.2s ease, transform 0.2s ease;
+    }
+
+    .game-card:hover .play-action {
+      gap: 0.55rem;
+    }
+
+    /* Game Accent Themes */
+    .theme-purple {
+      --card-accent: var(--color-purple);
+      --card-accent-light: var(--color-purple-light);
+      --card-glow: rgba(139, 92, 246, 0.18);
+    }
+
+    .theme-green {
+      --card-accent: var(--color-green);
+      --card-accent-light: var(--color-green-light);
+      --card-glow: rgba(16, 185, 129, 0.18);
+    }
+
+    .theme-blue {
+      --card-accent: var(--color-blue);
+      --card-accent-light: var(--color-blue-light);
+      --card-glow: rgba(6, 182, 212, 0.18);
+    }
+
+    .theme-pink {
+      --card-accent: var(--color-pink);
+      --card-accent-light: var(--color-pink-light);
+      --card-glow: rgba(236, 72, 153, 0.18);
+    }
+
+    /* ==========================================================================
+       Accessible Overlay Menu (Triggered via Top-Left Menu Button)
+       ========================================================================== */
+    .menu-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(4, 7, 16, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .menu-overlay.is-open {
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-start;
+      padding: 4.5rem 1.5rem 2rem;
+    }
+
+    .menu-panel {
+      width: 100%;
+      max-width: 580px;
+      background: linear-gradient(165deg, rgba(16, 22, 38, 0.98), rgba(9, 13, 25, 0.99));
+      border: 1px solid var(--border-highlight);
+      border-radius: 1.25rem;
+      padding: 1.25rem;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.9),
+                  0 0 25px rgba(139, 92, 246, 0.15);
+      animation: panelSlide 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes panelSlide {
+      from { opacity: 0; transform: translateY(-10px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 0.875rem;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 0.875rem;
+    }
+
+    .panel-title {
+      font-size: 0.9375rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .panel-close-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.5rem;
+      width: 1.875rem;
+      height: 1.875rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+    }
+
+    .panel-close-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+    }
+
+    .panel-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.625rem;
+      margin-bottom: 0.875rem;
+    }
+
+    @media (max-width: 520px) {
+      .panel-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel-game-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.75rem;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.15s ease;
+    }
+
+    .panel-game-item:hover {
+      background: rgba(255, 255, 255, 0.07);
+      border-color: var(--item-accent);
+      transform: translateX(2px);
+    }
+
+    .panel-icon-box {
+      width: 2.25rem;
+      height: 2.25rem;
+      border-radius: 0.5rem;
+      background: var(--item-glow);
+      color: var(--item-accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .panel-game-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .panel-game-title {
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: #fff;
+      display: block;
+    }
+
+    .panel-game-desc {
+      font-size: 0.6875rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: block;
+    }
+
+    .panel-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--border-subtle);
+      font-size: 0.75rem;
+      color: var(--text-subtle);
+    }
+
+    .panel-footer kbd {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.25rem;
+      padding: 0.1rem 0.35rem;
+      font-size: 0.6875rem;
+      color: var(--text-muted);
+    }
+
+    /* Fixed Clean Footer */
+    .site-footer {
+      border-top: 1px solid var(--border-subtle);
+      padding: 2rem 1.5rem;
+      text-align: center;
+      font-size: 0.8125rem;
+      color: var(--text-subtle);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="site-nav">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <!-- Logo -->
+        <a href="./index.html" class="brand-logo" aria-label="GameHub Home">
+          <div class="brand-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="6" width="20" height="12" rx="3"></rect>
+              <line x1="6" y1="12" x2="10" y2="12"></line>
+              <line x1="8" y1="10" x2="8" y2="14"></line>
+              <circle cx="15" cy="11" r="1" fill="currentColor"></circle>
+              <circle cx="17" cy="13" r="1" fill="currentColor"></circle>
+            </svg>
+          </div>
+          <span class="brand-name">GameHub</span>
+        </a>
+
+        <div class="nav-divider" aria-hidden="true"></div>
+
+        <!-- Menu Button (Top Left) -->
+        <button type="button" class="menu-trigger-btn" id="menuToggleBtn" aria-expanded="false" aria-controls="menuOverlay" aria-label="Browse mini games menu">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+            <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+            <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+            <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+          </svg>
+          <span>Games</span>
+          <svg class="trigger-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Right Header Slot: Profile Avatar (No overlap with menu or footer) -->
+      <div class="nav-right">
+        <button type="button" class="user-avatar-btn" title="Player Profile (User N)" aria-label="Player profile">
+          N
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Hub -->
+  <main class="hub-container">
+    <div class="hub-header">
+      <div class="header-badge-row">
+        <span class="badge-count">🎮 4 Games Available</span>
+        <span class="badge-live"><span class="live-dot"></span> Browser Ready (No Install)</span>
+      </div>
+      <h1 class="hub-title">Classic Mini Games Arcade</h1>
+      <p class="hub-subtitle">Choose a game below to play immediately in your browser. Fully responsive on mobile, tablet, and desktop.</p>
+    </div>
+
+    <!-- Responsive Game Cards Grid -->
+    <div class="games-grid">
+
+      <!-- 1. Tic Tac Toe (Purple Theme) -->
+      <a href="./games/tictactoe/index.html" class="game-card theme-purple" id="card-tictactoe">
+        <div>
+          <div class="card-head">
+            <div class="card-icon-square">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </div>
+            <span class="card-tag">Strategy</span>
+          </div>
+          <div class="card-content">
+            <h2 class="card-title">Tic Tac Toe</h2>
+            <p class="card-description">Classic three-in-a-row match with unbeatable Minimax AI or 2-player local mode.</p>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span class="player-badge">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            1-2 Players
+          </span>
+          <span class="play-action">Play <span>→</span></span>
+        </div>
+      </a>
+
+      <!-- 2. Wordle (Green Theme) -->
+      <a href="./games/wordle/index.html" class="game-card theme-green" id="card-wordle">
+        <div>
+          <div class="card-head">
+            <div class="card-icon-square">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+                <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+                <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+                <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+              </svg>
+            </div>
+            <span class="card-tag">Word Game</span>
+          </div>
+          <div class="card-content">
+            <h2 class="card-title">Wordle</h2>
+            <p class="card-description">Guess the secret 5-letter word in 6 attempts with full 14,800+ dictionary support.</p>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span class="player-badge">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Solo
+          </span>
+          <span class="play-action">Play <span>→</span></span>
+        </div>
+      </a>
+
+      <!-- 3. Chess (Blue Theme) -->
+      <a href="./games/chess/index.html" class="game-card theme-blue" id="card-chess">
+        <div>
+          <div class="card-head">
+            <div class="card-icon-square">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2a3 3 0 0 0-3 3c0 .8.3 1.5.8 2.1C8 8.4 6 11 6 15v1h12v-1c0-4-2-6.6-3.8-7.9.5-.6.8-1.3.8-2.1a3 3 0 0 0-3-3z"/>
+                <path d="M5 20h14a1 1 0 0 1 1 1v1H4v-1a1 1 0 0 1 1-1z"/>
+              </svg>
+            </div>
+            <span class="card-tag">Classic</span>
+          </div>
+          <div class="card-content">
+            <h2 class="card-title">Chess</h2>
+            <p class="card-description">The timeless game of kings with legal move highlighting, castling, and checkmate.</p>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span class="player-badge">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            1-2 Players
+          </span>
+          <span class="play-action">Play <span>→</span></span>
+        </div>
+      </a>
+
+      <!-- 4. Naval Battle (Pink Theme) -->
+      <a href="./games/naval/index.html" class="game-card theme-pink" id="card-naval">
+        <div>
+          <div class="card-head">
+            <div class="card-icon-square">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 17l2.5-9 15 0 2.5 9z"></path>
+                <path d="M6 8V4h4v4"></path>
+                <path d="M14 8V5h3v3"></path>
+                <path d="M2 21c2 0 3-1 5-1s3 1 5 1 3-1 5-1 3 1 5 1"></path>
+              </svg>
+            </div>
+            <span class="card-tag">Action</span>
+          </div>
+          <div class="card-content">
+            <h2 class="card-title">Naval Battle</h2>
+            <p class="card-description">Strategically position your fleet and hunt enemy battleships against smart AI radar.</p>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span class="player-badge">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/></svg>
+            vs Smart AI
+          </span>
+          <span class="play-action">Play <span>→</span></span>
+        </div>
+      </a>
+
+    </div>
+  </main>
+
+  <!-- Accessible Overlay Menu for Quick Switching -->
+  <div class="menu-overlay" id="menuOverlay" role="dialog" aria-modal="true" aria-label="GameHub Navigation Menu">
+    <div class="menu-panel">
+      <div class="panel-header">
+        <span class="panel-title">GameHub Quick Menu</span>
+        <button type="button" class="panel-close-btn" id="menuCloseBtn" aria-label="Close menu">✕</button>
+      </div>
+
+      <div class="panel-grid">
+        <a href="./games/tictactoe/index.html" class="panel-game-item" style="--item-accent: #c084fc; --item-glow: rgba(139,92,246,0.18);">
+          <div class="panel-icon-box">✕</div>
+          <div class="panel-game-info">
+            <span class="panel-game-title">Tic Tac Toe</span>
+            <span class="panel-game-desc">Strategy · 1-2 Players</span>
+          </div>
+        </a>
+
+        <a href="./games/wordle/index.html" class="panel-game-item" style="--item-accent: #34d399; --item-glow: rgba(16,185,129,0.18);">
+          <div class="panel-icon-box">🔤</div>
+          <div class="panel-game-info">
+            <span class="panel-game-title">Wordle</span>
+            <span class="panel-game-desc">Word Game · Solo</span>
+          </div>
+        </a>
+
+        <a href="./games/chess/index.html" class="panel-game-item" style="--item-accent: #38bdf8; --item-glow: rgba(6,182,212,0.18);">
+          <div class="panel-icon-box">♟</div>
+          <div class="panel-game-info">
+            <span class="panel-game-title">Chess</span>
+            <span class="panel-game-desc">Classic · 1-2 Players</span>
+          </div>
+        </a>
+
+        <a href="./games/naval/index.html" class="panel-game-item" style="--item-accent: #f472b6; --item-glow: rgba(236,72,153,0.18);">
+          <div class="panel-icon-box">🚢</div>
+          <div class="panel-game-info">
+            <span class="panel-game-title">Naval Battle</span>
+            <span class="panel-game-desc">Action · vs Smart AI</span>
+          </div>
+        </a>
+      </div>
+
+      <div class="panel-footer">
+        <span>GameHub v1.0 • Static GitHub Pages Ready</span>
+        <span>Press <kbd>ESC</kbd> to close</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Site Footer -->
+  <footer class="site-footer">
+    <p>© 2026 GameHub • Built with pure HTML, CSS, and JavaScript. Hosted on GitHub Pages.</p>
+  </footer>
+
+  <script>
+    // Pure Vanilla JS Menu Toggle & Accessibility
+    const menuBtn = document.getElementById('menuToggleBtn');
+    const overlay = document.getElementById('menuOverlay');
+    const closeBtn = document.getElementById('menuCloseBtn');
+
+    function openMenu() {
+      overlay.classList.add('is-open');
+      menuBtn.classList.add('is-active');
+      menuBtn.setAttribute('aria-expanded', 'true');
+      closeBtn.focus();
+    }
+
+    function closeMenu() {
+      overlay.classList.remove('is-open');
+      menuBtn.classList.remove('is-active');
+      menuBtn.setAttribute('aria-expanded', 'false');
+      menuBtn.focus();
+    }
+
+    menuBtn.addEventListener('click', () => {
+      const isOpen = overlay.classList.contains('is-open');
+      if (isOpen) closeMenu();
+      else openMenu();
+    });
+
+    closeBtn.addEventListener('click', closeMenu);
+
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) closeMenu();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && overlay.classList.contains('is-open')) {
+        closeMenu();
+      }
+    });
+  </script>
+</body>
+</html>

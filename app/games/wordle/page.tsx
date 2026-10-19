@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { pickRandomWord, WORDS } from './words';
+import { pickRandomWord, isValidWord } from './words';
+import Confetti from '@/app/components/Confetti';
 
 const WORD_LENGTH = 5;
 const MAX_GUESSES = 6;
@@ -51,8 +52,12 @@ function evaluateGuess(guess: string, target: string): GuessLetter[] {
 }
 
 export default function WordlePage() {
-  const [target, setTarget] = useState<string>(() => pickRandomWord());
+  const [target, setTarget] = useState<string>('CRANE');
   const [guesses, setGuesses] = useState<GuessLetter[][]>([]);
+
+  useEffect(() => {
+    setTarget(pickRandomWord());
+  }, []);
   const [current, setCurrent] = useState('');
   const [gameOver, setGameOver] = useState(false);
   const [won, setWon] = useState(false);
@@ -73,7 +78,7 @@ export default function WordlePage() {
       showMessage('Not enough letters');
       return;
     }
-    if (!WORDS.includes(current.toLowerCase())) {
+    if (!isValidWord(current)) {
       setShaking(true);
       setTimeout(() => setShaking(false), 500);
       showMessage('Not in word list');
@@ -175,6 +180,7 @@ export default function WordlePage() {
 
   return (
     <main className="game-page">
+      <Confetti active={won} duration={3000} />
       <div className="game-page-header">
         <Link href="/" className="game-page-back">← Back to Games</Link>
         <h1 className="game-page-title" style={{ color: '#34d399' }}>

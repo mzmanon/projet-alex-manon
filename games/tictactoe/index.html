@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tic Tac Toe — GameHub</title>
+  <style>
+    :root {
+      --bg-base: #060913;
+      --bg-card: rgba(255, 255, 255, 0.04);
+      --border-subtle: rgba(255, 255, 255, 0.09);
+      --purple: #8b5cf6;
+      --purple-light: #c084fc;
+      --cyan: #06b6d4;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      background: var(--bg-base);
+      color: var(--text-main);
+      font-family: system-ui, -apple-system, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+      background-image: radial-gradient(circle at 20% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 40%);
+    }
+    .back-nav {
+      width: 100%;
+      max-width: 440px;
+      margin-bottom: 1.5rem;
+    }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 0.4rem 0.8rem;
+      border-radius: 0.5rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      transition: all 0.2s;
+    }
+    .back-btn:hover { color: #fff; border-color: var(--purple-light); }
+    .game-box {
+      width: 100%;
+      max-width: 440px;
+      background: rgba(15, 20, 35, 0.85);
+      border: 1px solid var(--border-subtle);
+      border-radius: 1.25rem;
+      padding: 1.75rem;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+      text-align: center;
+    }
+    h1 { font-size: 1.75rem; color: var(--purple-light); margin-bottom: 0.25rem; }
+    p.sub { color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.25rem; }
+    .mode-bar {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      margin-bottom: 1.25rem;
+    }
+    .mode-btn {
+      padding: 0.4rem 0.85rem;
+      border-radius: 9999px;
+      border: 1px solid var(--border-subtle);
+      background: rgba(255,255,255,0.05);
+      color: var(--text-muted);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .mode-btn.active {
+      background: rgba(139,92,246,0.25);
+      border-color: var(--purple-light);
+      color: #fff;
+    }
+    .status-badge {
+      display: inline-block;
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 1.25rem;
+      padding: 0.35rem 1rem;
+      border-radius: 9999px;
+      background: rgba(255,255,255,0.06);
+    }
+    .ttt-board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.625rem;
+      margin-bottom: 1.5rem;
+    }
+    .cell {
+      aspect-ratio: 1;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.875rem;
+      font-size: 2.25rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s;
+      user-select: none;
+    }
+    .cell:hover:not(.filled) { background: rgba(139,92,246,0.15); border-color: var(--purple-light); }
+    .cell.x { color: var(--purple-light); }
+    .cell.o { color: var(--cyan); }
+    .cell.win { background: rgba(139,92,246,0.3); border-color: var(--purple-light); transform: scale(1.03); }
+    .reset-btn {
+      padding: 0.6rem 1.5rem;
+      border-radius: 0.625rem;
+      border: 1px solid var(--border-subtle);
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+    }
+    .reset-btn:hover { background: rgba(139,92,246,0.2); border-color: var(--purple); }
+    canvas#confetti { position: fixed; inset: 0; pointer-events: none; z-index: 9999; }
+  </style>
+</head>
+<body>
+  <canvas id="confetti"></canvas>
+
+  <nav class="back-nav">
+    <a href="../../index.html" class="back-btn">← Back to GameHub</a>
+  </nav>
+
+  <main class="game-box">
+    <h1>✕ Tic Tac Toe</h1>
+    <p class="sub">Three in a row wins</p>
+
+    <div class="mode-bar">
+      <button class="mode-btn active" id="btnAi">vs Smart AI</button>
+      <button class="mode-btn" id="btnPvp">2 Players (Local)</button>
+    </div>
+
+    <div class="status-badge" id="statusText">Player X's turn</div>
+
+    <div class="ttt-board" id="board">
+      <div class="cell" data-idx="0"></div>
+      <div class="cell" data-idx="1"></div>
+      <div class="cell" data-idx="2"></div>
+      <div class="cell" data-idx="3"></div>
+      <div class="cell" data-idx="4"></div>
+      <div class="cell" data-idx="5"></div>
+      <div class="cell" data-idx="6"></div>
+      <div class="cell" data-idx="7"></div>
+      <div class="cell" data-idx="8"></div>
+    </div>
+
+    <button class="reset-btn" id="resetBtn">Restart Match</button>
+  </main>
+
+  <script>
+    let board = Array(9).fill(null);
+    let current = 'X';
+    let mode = 'ai';
+    let gameOver = false;
+
+    const LINES = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+    const statusText = document.getElementById('statusText');
+    const cells = document.querySelectorAll('.cell');
+
+    function checkWin(b) {
+      for (const [x,y,z] of LINES) {
+        if (b[x] && b[x] === b[y] && b[x] === b[z]) return { winner: b[x], line: [x,y,z] };
+      }
+      return null;
+    }
+
+    function minimax(b, depth, isMax, alpha, beta) {
+      const res = checkWin(b);
+      if (res) return res.winner === 'O' ? 10 - depth : depth - 10;
+      if (b.every(Boolean)) return 0;
+
+      if (isMax) {
+        let maxEval = -Infinity;
+        for (let i = 0; i < 9; i++) {
+          if (!b[i]) {
+            b[i] = 'O';
+            const val = minimax(b, depth + 1, false, alpha, beta);
+            b[i] = null;
+            maxEval = Math.max(maxEval, val);
+            alpha = Math.max(alpha, val);
+            if (beta <= alpha) break;
+          }
+        }
+        return maxEval;
+      } else {
+        let minEval = Infinity;
+        for (let i = 0; i < 9; i++) {
+          if (!b[i]) {
+            b[i] = 'X';
+            const val = minimax(b, depth + 1, true, alpha, beta);
+            b[i] = null;
+            minEval = Math.min(minEval, val);
+            beta = Math.min(beta, val);
+            if (beta <= alpha) break;
+          }
+        }
+        return minEval;
+      }
+    }
+
+    function getBestMove(b) {
+      let bestScore = -Infinity, move = -1;
+      for (let i = 0; i < 9; i++) {
+        if (!b[i]) {
+          b[i] = 'O';
+          const score = minimax(b, 0, false, -Infinity, Infinity);
+          b[i] = null;
+          if (score > bestScore) { bestScore = score; move = i; }
+        }
+      }
+      return move;
+    }
+
+    function fireConfetti() {
+      const cvs = document.getElementById('confetti');
+      const ctx = cvs.getContext('2d');
+      cvs.width = window.innerWidth; cvs.height = window.innerHeight;
+      const particles = Array.from({ length: 120 }, () => ({
+        x: cvs.width * 0.5, y: cvs.height * 0.4,
+        vx: (Math.random() - 0.5) * 16, vy: Math.random() * -14 - 4,
+        size: Math.random() * 7 + 5,
+        color: ['#8b5cf6', '#06b6d4', '#10b981', '#fbbf24', '#ec4899'][Math.floor(Math.random()*5)],
+        rot: Math.random() * 360, vr: (Math.random() - 0.5) * 10
+      }));
+      const start = performance.now();
+      function render(now) {
+        const el = now - start;
+        if (el >= 3000) { ctx.clearRect(0,0,cvs.width,cvs.height); return; }
+        ctx.clearRect(0,0,cvs.width,cvs.height);
+        ctx.globalAlpha = el > 2300 ? (3000 - el)/700 : 1;
+        particles.forEach(p => {
+          p.x += p.vx; p.y += p.vy; p.vy += 0.4; p.rot += p.vr;
+          ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot*Math.PI/180);
+          ctx.fillStyle = p.color; ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
+          ctx.restore();
+        });
+        requestAnimationFrame(render);
+      }
+      requestAnimationFrame(render);
+    }
+
+    function renderBoard() {
+      const win = checkWin(board);
+      cells.forEach((cell, i) => {
+        cell.textContent = board[i] || '';
+        cell.className = 'cell' + (board[i] ? ' filled ' + board[i].toLowerCase() : '') + (win && win.line.includes(i) ? ' win' : '');
+      });
+      if (win) {
+        gameOver = true;
+        statusText.textContent = (mode === 'ai' && win.winner === 'O' ? '🤖 AI wins!' : `Player ${win.winner} wins! 🎉`);
+        if (win.winner === 'X' || mode === 'pvp') fireConfetti();
+      } else if (board.every(Boolean)) {
+        gameOver = true;
+        statusText.textContent = "It's a draw! 🤝";
+      } else {
+        statusText.textContent = `Player ${current}'s turn`;
+      }
+    }
+
+    function makeMove(idx) {
+      if (board[idx] || gameOver) return;
+      board[idx] = current;
+      renderBoard();
+      if (!checkWin(board) && !board.every(Boolean)) {
+        current = current === 'X' ? 'O' : 'X';
+        renderBoard();
+        if (mode === 'ai' && current === 'O' && !gameOver) {
+          statusText.textContent = '🤖 AI is thinking...';
+          setTimeout(() => {
+            const aiIdx = getBestMove(board);
+            if (aiIdx >= 0) {
+              board[aiIdx] = 'O';
+              current = 'X';
+              renderBoard();
+            }
+          }, 350);
+        }
+      }
+    }
+
+    cells.forEach(c => c.addEventListener('click', () => makeMove(parseInt(c.dataset.idx))));
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      board = Array(9).fill(null);
+      current = 'X';
+      gameOver = false;
+      renderBoard();
+    });
+    document.getElementById('btnAi').addEventListener('click', (e) => {
+      mode = 'ai';
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+      e.target.classList.add('active');
+      board = Array(9).fill(null); current = 'X'; gameOver = false; renderBoard();
+    });
+    document.getElementById('btnPvp').addEventListener('click', (e) => {
+      mode = 'pvp';
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+      e.target.classList.add('active');
+      board = Array(9).fill(null); current = 'X'; gameOver = false; renderBoard();
+    });
+
+    renderBoard();
+  </script>
+</body>
+</html>

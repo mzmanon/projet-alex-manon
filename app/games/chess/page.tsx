@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
+import Confetti from '@/app/components/Confetti';
 import {
   GameState, PieceType, PIECE_UNICODE,
   initialState, getLegalMoves, processMove, Color,
@@ -91,6 +92,7 @@ export default function ChessPage() {
 
   return (
     <main className="game-page">
+      <Confetti active={Boolean(state.checkmate)} duration={3000} />
       <div className="game-page-header">
         <Link href="/" className="game-page-back">← Back to Games</Link>
         <h1 className="game-page-title" style={{ color: 'var(--cyan-light)' }}>

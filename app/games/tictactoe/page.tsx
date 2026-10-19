@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import Confetti from '@/app/components/Confetti';
 
 type Player = 'X' | 'O';
 type Cell = Player | null;
@@ -150,6 +151,7 @@ export default function TicTacToePage() {
 
   return (
     <main className="game-page">
+      <Confetti active={Boolean(winResult)} duration={3000} />
       <div className="game-page-header">
         <Link href="/" className="game-page-back">← Back to Games</Link>
         <h1 className="game-page-title" style={{ color: 'var(--purple-light)' }}>

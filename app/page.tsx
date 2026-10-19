@@ -1,206 +1,172 @@
+'use client';
+
 import Link from 'next/link';
 
-const games = [
+interface GameItem {
+  href: string;
+  title: string;
+  tag: string;
+  desc: string;
+  players: string;
+  themeClass: string;
+  accent: string;
+  accentLight: string;
+  glow: string;
+  iconSvg: React.ReactNode;
+}
+
+const games: GameItem[] = [
   {
     href: '/games/tictactoe',
-    emoji: '✕',
     title: 'Tic Tac Toe',
     tag: 'Strategy',
-    desc: 'Classic three-in-a-row game. Challenge a friend or test your skills against an AI opponent.',
+    desc: 'Classic three-in-a-row match with unbeatable Minimax AI or 2-player local mode.',
     players: '1-2 Players',
-    color: 'var(--purple)',
-    colorLight: 'var(--purple-light)',
-    bg: 'rgba(139,92,246,0.12)',
-    tagBg: 'rgba(139,92,246,0.2)',
-    tagColor: 'var(--purple-light)',
-    glow: 'radial-gradient(ellipse at 50% 100%, rgba(139,92,246,0.25) 0%, transparent 70%)',
+    themeClass: 'theme-purple',
+    accent: '#8b5cf6',
+    accentLight: '#c084fc',
+    glow: 'rgba(139, 92, 246, 0.18)',
+    iconSvg: (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
+      </svg>
+    ),
   },
   {
     href: '/games/wordle',
-    emoji: '🔤',
     title: 'Wordle',
     tag: 'Word Game',
-    desc: 'Guess the hidden 5-letter word in 6 tries. Color hints guide your way to the answer.',
-    players: '1 Player',
-    color: 'var(--green)',
-    colorLight: '#34d399',
-    bg: 'rgba(16,185,129,0.1)',
-    tagBg: 'rgba(16,185,129,0.2)',
-    tagColor: '#34d399',
-    glow: 'radial-gradient(ellipse at 50% 100%, rgba(16,185,129,0.2) 0%, transparent 70%)',
+    desc: 'Guess the secret 5-letter word in 6 attempts with full 14,800+ dictionary support.',
+    players: 'Solo',
+    themeClass: 'theme-green',
+    accent: '#10b981',
+    accentLight: '#34d399',
+    glow: 'rgba(16, 185, 129, 0.18)',
+    iconSvg: (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="3" width="7" height="7" rx="1.5" />
+        <rect x="14" y="3" width="7" height="7" rx="1.5" />
+        <rect x="3" y="14" width="7" height="7" rx="1.5" />
+        <rect x="14" y="14" width="7" height="7" rx="1.5" />
+      </svg>
+    ),
   },
   {
     href: '/games/chess',
-    emoji: '♟',
     title: 'Chess',
     tag: 'Classic',
-    desc: 'The timeless game of kings. Battle in a full chess match with all rules enforced.',
-    players: '2 Players',
-    color: 'var(--cyan)',
-    colorLight: 'var(--cyan-light)',
-    bg: 'rgba(6,182,212,0.1)',
-    tagBg: 'rgba(6,182,212,0.2)',
-    tagColor: 'var(--cyan-light)',
-    glow: 'radial-gradient(ellipse at 50% 100%, rgba(6,182,212,0.2) 0%, transparent 70%)',
+    desc: 'The timeless game of kings with legal move highlighting, castling, and checkmate.',
+    players: '1-2 Players',
+    themeClass: 'theme-blue',
+    accent: '#06b6d4',
+    accentLight: '#38bdf8',
+    glow: 'rgba(6, 182, 212, 0.18)',
+    iconSvg: (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 2a3 3 0 0 0-3 3c0 .8.3 1.5.8 2.1C8 8.4 6 11 6 15v1h12v-1c0-4-2-6.6-3.8-7.9.5-.6.8-1.3.8-2.1a3 3 0 0 0-3-3z" />
+        <path d="M5 20h14a1 1 0 0 1 1 1v1H4v-1a1 1 0 0 1 1-1z" />
+      </svg>
+    ),
   },
   {
     href: '/games/naval',
-    emoji: '🚢',
     title: 'Naval Battle',
     tag: 'Action',
-    desc: 'Sink the enemy fleet before they sink yours! Strategic placement meets sharp intuition.',
-    players: '1 Player vs AI',
-    color: 'var(--pink)',
-    colorLight: 'var(--pink-light)',
-    bg: 'rgba(236,72,153,0.1)',
-    tagBg: 'rgba(236,72,153,0.2)',
-    tagColor: 'var(--pink-light)',
-    glow: 'radial-gradient(ellipse at 50% 100%, rgba(236,72,153,0.2) 0%, transparent 70%)',
+    desc: 'Strategically position your fleet and hunt enemy battleships against smart AI radar.',
+    players: 'vs Smart AI',
+    themeClass: 'theme-pink',
+    accent: '#ec4899',
+    accentLight: '#f472b6',
+    glow: 'rgba(236, 72, 153, 0.18)',
+    iconSvg: (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M2 17l2.5-9 15 0 2.5 9z" />
+        <path d="M6 8V4h4v4" />
+        <path d="M14 8V5h3v3" />
+        <path d="M2 21c2 0 3-1 5-1s3 1 5 1 3-1 5-1 3 1 5 1" />
+      </svg>
+    ),
   },
 ];
 
 export default function HomePage() {
   return (
     <>
-      {/* Stars */}
+      {/* Background Starscape */}
       <div className="stars-bg" aria-hidden="true">
-        {Array.from({ length: 80 }).map((_, i) => (
+        {Array.from({ length: 50 }).map((_, i) => (
           <div
             key={i}
             className="star"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              width: `${Math.random() * 2 + 1}px`,
-              height: `${Math.random() * 2 + 1}px`,
-              opacity: Math.random() * 0.6 + 0.1,
-              '--dur': `${Math.random() * 4 + 2}s`,
+              left: `${(i * 19.3) % 100}%`,
+              top: `${(i * 23.7) % 100}%`,
+              width: `${(i % 3) + 1.5}px`,
+              height: `${(i % 3) + 1.5}px`,
+              opacity: ((i % 5) + 3) * 0.1,
+              '--dur': `${(i % 4) + 2}s`,
             } as React.CSSProperties}
           />
         ))}
       </div>
 
-      {/* Hero */}
-      <section className="hero" id="hero" aria-labelledby="hero-title">
-        <div className="hero-badge">
-          <span>✨</span>
-          <span>4 Games · No Signup · Free Forever</span>
-        </div>
-
-        <h1 className="hero-title" id="hero-title">
-          Your Arcade,{' '}
-          <span className="gradient-text">Reimagined</span>
-        </h1>
-
-        <p className="hero-desc">
-          Enjoy beautifully crafted mini games right in your browser. From classic strategy to word puzzles — all in one place.
-        </p>
-
-        <div className="hero-cta">
-          <Link href="/games/chess" className="btn btn-primary">
-            🎮 Start Playing
-          </Link>
-          <a href="#games" className="btn btn-secondary">
-            Browse Games ↓
-          </a>
-        </div>
-
-        {/* Stats */}
-        <div className="stats-grid" style={{ maxWidth: 720, marginTop: '4rem' }}>
-          {[
-            { value: '4', label: 'Epic Games' },
-            { value: '∞', label: 'Replays' },
-            { value: '0s', label: 'Setup Time' },
-            { value: '100%', label: 'Free' },
-          ].map((s) => (
-            <div className="stat-card" key={s.label}>
-              <div className="stat-value">{s.value}</div>
-              <div className="stat-label">{s.label}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Games Section */}
-      <section id="games" className="section" aria-labelledby="games-title">
-        <div className="section-header">
-          <span className="section-label">Game Library</span>
-          <h2 className="section-title" id="games-title">Pick Your Game</h2>
-          <p className="section-subtitle">
-            Every game is fully playable, polished, and packed with features.
+      <main className="hub-container" style={{ paddingTop: '7rem' }}>
+        {/* Hub Header */}
+        <div className="hub-header">
+          <div className="header-badge-row">
+            <span className="badge-count">🎮 4 Games Available</span>
+            <span className="badge-live">
+              <span className="live-dot" /> Play in Browser (No Install)
+            </span>
+          </div>
+          <h1 className="hub-title">Classic Mini Games Arcade</h1>
+          <p className="hub-subtitle">
+            Choose a game below to play immediately. Fully responsive on mobile, tablet, and desktop with smart AI opponents.
           </p>
         </div>
 
+        {/* Responsive Game Cards Grid (1 col mobile, 2 col tablet, 4 col desktop) */}
         <div className="games-grid">
           {games.map((game) => (
             <Link
               key={game.href}
               href={game.href}
-              className="game-card"
+              className={`game-card ${game.themeClass}`}
               aria-label={`Play ${game.title}`}
             >
-              {/* Glow overlay */}
-              <div
-                className="game-card-glow"
-                style={{ background: game.glow }}
-              />
-
-              {/* Visual */}
-              <div
-                className="game-card-visual"
-                style={{ background: game.bg }}
-              >
-                <span
-                  className="game-card-icon"
-                  style={{ color: game.color }}
-                >
-                  {game.emoji}
-                </span>
+              <div>
+                <div className="card-head">
+                  <div className="card-icon-square">
+                    {game.iconSvg}
+                  </div>
+                  <span className="card-tag">{game.tag}</span>
+                </div>
+                <div className="card-content">
+                  <h2 className="card-title">{game.title}</h2>
+                  <p className="card-description">{game.desc}</p>
+                </div>
               </div>
 
-              {/* Content */}
-              <div className="game-card-content">
-                <span
-                  className="game-card-tag"
-                  style={{
-                    background: game.tagBg,
-                    color: game.tagColor,
-                  }}
-                >
-                  {game.tag}
+              <div className="card-footer">
+                <span className="player-badge">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                  </svg>
+                  {game.players}
                 </span>
-                <h3 className="game-card-title">{game.title}</h3>
-                <p className="game-card-desc">{game.desc}</p>
-                <div className="game-card-footer">
-                  <span className="game-card-players">
-                    👥 {game.players}
-                  </span>
-                  <span
-                    className="game-card-play"
-                    style={{
-                      background: game.tagBg,
-                      color: game.tagColor,
-                    }}
-                  >
-                    Play now →
-                  </span>
-                </div>
+                <span className="play-action">
+                  Play <span>→</span>
+                </span>
               </div>
             </Link>
           ))}
         </div>
-      </section>
+      </main>
 
-      {/* Footer */}
-      <footer className="footer">
-        <p>
-          Built with ❤️ by{' '}
-          <a href="#">Alex & Manon</a>
-          {' · '}
-          <a href="https://nextjs.org" target="_blank" rel="noopener noreferrer">
-            Powered by Next.js
-          </a>
-        </p>
+      <footer className="site-footer">
+        <p>© 2026 GameHub • Built with pure HTML, CSS, and TypeScript. Ready for GitHub Pages.</p>
       </footer>
     </>
   );
