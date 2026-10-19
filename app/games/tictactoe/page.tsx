@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { recordGameResult } from '@/lib/stats';
 
 type Player = 'X' | 'O';
 type Cell = Player | null;
@@ -91,12 +92,18 @@ export default function TicTacToePage() {
     const res = checkWinner(next);
     if (res) {
       setScores(s => ({ ...s, [res.winner]: s[res.winner] + 1 }));
+      if (mode === 'ai') {
+        recordGameResult('tictactoe', res.winner === 'X' ? 'win' : 'loss');
+      } else {
+        recordGameResult('tictactoe', 'win');
+      }
     } else if (next.every(Boolean)) {
       setScores(s => ({ ...s, draws: s.draws + 1 }));
+      recordGameResult('tictactoe', 'draw');
     } else {
       setCurrent(p => p === 'X' ? 'O' : 'X');
     }
-  }, []);
+  }, [mode]);
 
   // Human click
   function handleClick(idx: number) {

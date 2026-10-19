@@ -1,6 +1,17 @@
 import Link from 'next/link';
+import PlayerStatsCards from '@/app/components/PlayerStatsCards';
+
+const STARS = Array.from({ length: 80 }, (_, i) => {
+  const left = (i * 37 + 13) % 100;
+  const top = (i * 73 + 29) % 100;
+  const size = (((i * 19) % 20) / 10 + 1).toFixed(1);
+  const opacity = (((i * 41) % 55 + 15) / 100).toFixed(2);
+  const dur = (((i * 31) % 35 + 20) / 10).toFixed(1);
+  return { left: `${left}%`, top: `${top}%`, size: `${size}px`, opacity, dur: `${dur}s` };
+});
 
 const games = [
+
   {
     href: '/games/tictactoe',
     emoji: '✕',
@@ -64,17 +75,17 @@ export default function HomePage() {
     <>
       {/* Stars */}
       <div className="stars-bg" aria-hidden="true">
-        {Array.from({ length: 80 }).map((_, i) => (
+        {STARS.map((s, i) => (
           <div
             key={i}
             className="star"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              width: `${Math.random() * 2 + 1}px`,
-              height: `${Math.random() * 2 + 1}px`,
-              opacity: Math.random() * 0.6 + 0.1,
-              '--dur': `${Math.random() * 4 + 2}s`,
+              left: s.left,
+              top: s.top,
+              width: s.size,
+              height: s.size,
+              opacity: s.opacity,
+              '--dur': s.dur,
             } as React.CSSProperties}
           />
         ))}
@@ -97,11 +108,11 @@ export default function HomePage() {
         </p>
 
         <div className="hero-cta">
-          <Link href="/games/chess" className="btn btn-primary">
-            🎮 Start Playing
-          </Link>
-          <a href="#games" className="btn btn-secondary">
-            Browse Games ↓
+          <a href="#games" className="btn btn-primary">
+            🎮 Browse Games
+          </a>
+          <a href="#stats" className="btn btn-secondary">
+            📊 View Stats ↓
           </a>
         </div>
 
@@ -120,6 +131,9 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+
+      {/* Player Statistics Section */}
+      <PlayerStatsCards />
 
       {/* Games Section */}
       <section id="games" className="section" aria-labelledby="games-title">

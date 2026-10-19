@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { pickRandomWord, WORDS } from './words';
+import { recordGameResult } from '@/lib/stats';
 
 const WORD_LENGTH = 5;
 const MAX_GUESSES = 6;
@@ -51,8 +52,12 @@ function evaluateGuess(guess: string, target: string): GuessLetter[] {
 }
 
 export default function WordlePage() {
-  const [target, setTarget] = useState<string>(() => pickRandomWord());
+  const [target, setTarget] = useState<string>('REACT');
   const [guesses, setGuesses] = useState<GuessLetter[][]>([]);
+
+  useEffect(() => {
+    setTarget(pickRandomWord());
+  }, []);
   const [current, setCurrent] = useState('');
   const [gameOver, setGameOver] = useState(false);
   const [won, setWon] = useState(false);
@@ -100,12 +105,14 @@ export default function WordlePage() {
 
     const isWin = evaluated.every(l => l.state === 'correct');
     if (isWin) {
+      recordGameResult('wordle', 'win');
       setTimeout(() => {
         setWon(true);
         setGameOver(true);
         showMessage('🎉 Brilliant!', 3000);
       }, WORD_LENGTH * 150 + 300);
     } else if (newGuesses.length === MAX_GUESSES) {
+      recordGameResult('wordle', 'loss');
       setTimeout(() => {
         setGameOver(true);
         showMessage(`The word was ${target}`, 4000);

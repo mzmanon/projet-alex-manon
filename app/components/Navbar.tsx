@@ -30,6 +30,19 @@ export default function Navbar() {
             </Link>
           </li>
         ))}
+        <li>
+          <Link
+            href="/#stats"
+            style={{
+              color: 'var(--cyan-light)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.25rem',
+            }}
+          >
+            <span>📊</span> Stats
+          </Link>
+        </li>
       </ul>
     </nav>
   );

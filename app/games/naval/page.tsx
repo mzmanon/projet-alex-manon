@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { recordGameResult } from '@/lib/stats';
 
 const GRID = 10;
 
@@ -173,6 +174,7 @@ export default function NavalPage() {
           if (allSunk) {
             setPhase('gameover');
             setWinner('ai');
+            recordGameResult('naval', 'loss');
             addLog('💀 AI wins! Better luck next time.', 'sunk');
           }
         } else {
@@ -248,6 +250,7 @@ export default function NavalPage() {
           if (allSunk) {
             setPhase('gameover');
             setWinner('player');
+            recordGameResult('naval', 'win');
             addLog('🏆 You win! Fleet destroyed!', 'sunk');
           }
         } else {

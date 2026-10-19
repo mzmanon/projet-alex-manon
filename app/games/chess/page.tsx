@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { recordGameResult } from '@/lib/stats';
 import {
   GameState, PieceType, PIECE_UNICODE,
   initialState, getLegalMoves, processMove, Color,
@@ -15,6 +16,17 @@ export default function ChessPage() {
   const [state, setState] = useState<GameState>(initialState());
   const [flipped, setFlipped] = useState(false);
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
+  const recordedGameOver = useRef(false);
+
+  useEffect(() => {
+    if (state.checkmate && !recordedGameOver.current) {
+      recordedGameOver.current = true;
+      recordGameResult('chess', 'win');
+    } else if (state.stalemate && !recordedGameOver.current) {
+      recordedGameOver.current = true;
+      recordGameResult('chess', 'draw');
+    }
+  }, [state.checkmate, state.stalemate]);
 
   const handleCellClick = useCallback((row: number, col: number) => {
     const { board, turn, selected, legalMoves, checkmate, stalemate, promotionPending } = state;
@@ -63,6 +75,7 @@ export default function ChessPage() {
   function reset() {
     setState(initialState());
     setMoveHistory([]);
+    recordedGameOver.current = false;
   }
 
   const { board, turn, selected, legalMoves, inCheck, checkmate, stalemate, promotionPending,
