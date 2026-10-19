@@ -11,7 +11,6 @@ const STARS = Array.from({ length: 80 }, (_, i) => {
 });
 
 const games = [
-
   {
     href: '/games/tictactoe',
     emoji: '✕',
@@ -19,12 +18,12 @@ const games = [
     tag: 'Strategy',
     desc: 'Classic three-in-a-row game. Challenge a friend or test your skills against an AI opponent.',
     players: '1-2 Players',
-    color: 'var(--purple)',
-    colorLight: 'var(--purple-light)',
-    bg: 'rgba(139,92,246,0.12)',
-    tagBg: 'rgba(139,92,246,0.2)',
-    tagColor: 'var(--purple-light)',
-    glow: 'radial-gradient(ellipse at 50% 100%, rgba(139,92,246,0.25) 0%, transparent 70%)',
+    color: 'var(--cyan)',
+    colorLight: 'var(--cyan-light)',
+    bg: 'rgba(2, 132, 199, 0.1)',
+    tagBg: 'rgba(2, 132, 199, 0.14)',
+    tagColor: 'var(--cyan)',
+    glow: 'radial-gradient(ellipse at 50% 100%, rgba(2, 132, 199, 0.25) 0%, transparent 70%)',
   },
   {
     href: '/games/wordle',
@@ -34,11 +33,11 @@ const games = [
     desc: 'Guess the hidden 5-letter word in 6 tries. Color hints guide your way to the answer.',
     players: '1 Player',
     color: 'var(--green)',
-    colorLight: '#34d399',
-    bg: 'rgba(16,185,129,0.1)',
-    tagBg: 'rgba(16,185,129,0.2)',
-    tagColor: '#34d399',
-    glow: 'radial-gradient(ellipse at 50% 100%, rgba(16,185,129,0.2) 0%, transparent 70%)',
+    colorLight: '#10b981',
+    bg: 'rgba(16, 185, 129, 0.1)',
+    tagBg: 'rgba(16, 185, 129, 0.14)',
+    tagColor: 'var(--green)',
+    glow: 'radial-gradient(ellipse at 50% 100%, rgba(16, 185, 129, 0.2) 0%, transparent 70%)',
   },
   {
     href: '/games/chess',
@@ -49,10 +48,10 @@ const games = [
     players: '2 Players',
     color: 'var(--cyan)',
     colorLight: 'var(--cyan-light)',
-    bg: 'rgba(6,182,212,0.1)',
-    tagBg: 'rgba(6,182,212,0.2)',
-    tagColor: 'var(--cyan-light)',
-    glow: 'radial-gradient(ellipse at 50% 100%, rgba(6,182,212,0.2) 0%, transparent 70%)',
+    bg: 'rgba(2, 132, 199, 0.1)',
+    tagBg: 'rgba(2, 132, 199, 0.14)',
+    tagColor: 'var(--cyan)',
+    glow: 'radial-gradient(ellipse at 50% 100%, rgba(2, 132, 199, 0.25) 0%, transparent 70%)',
   },
   {
     href: '/games/naval',
@@ -61,12 +60,12 @@ const games = [
     tag: 'Action',
     desc: 'Sink the enemy fleet before they sink yours! Strategic placement meets sharp intuition.',
     players: '1 Player vs AI',
-    color: 'var(--pink)',
-    colorLight: 'var(--pink-light)',
-    bg: 'rgba(236,72,153,0.1)',
-    tagBg: 'rgba(236,72,153,0.2)',
-    tagColor: 'var(--pink-light)',
-    glow: 'radial-gradient(ellipse at 50% 100%, rgba(236,72,153,0.2) 0%, transparent 70%)',
+    color: '#2563eb',
+    colorLight: '#60a5fa',
+    bg: 'rgba(37, 99, 235, 0.1)',
+    tagBg: 'rgba(37, 99, 235, 0.14)',
+    tagColor: '#2563eb',
+    glow: 'radial-gradient(ellipse at 50% 100%, rgba(37, 99, 235, 0.2) 0%, transparent 70%)',
   },
 ];
 

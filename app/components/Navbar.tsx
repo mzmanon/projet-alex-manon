@@ -19,12 +19,13 @@ export default function Navbar() {
         <span className="navbar-logo-icon">🎮</span>
         GameHub
       </Link>
+
       <ul className="navbar-links">
         {games.map((g) => (
           <li key={g.href}>
             <Link
               href={g.href}
-              style={{ color: pathname === g.href ? 'var(--purple-light)' : undefined }}
+              style={{ color: pathname === g.href ? 'var(--cyan)' : undefined }}
             >
               {g.label}
             </Link>
@@ -34,7 +35,7 @@ export default function Navbar() {
           <Link
             href="/#stats"
             style={{
-              color: 'var(--cyan-light)',
+              color: 'var(--cyan)',
               display: 'inline-flex',
               alignItems: 'center',
               gap: '0.25rem',
