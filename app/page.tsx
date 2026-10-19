@@ -1,6 +1,16 @@
 'use client';
 
 import Link from 'next/link';
+import PlayerStatsCards from '@/app/components/PlayerStatsCards';
+
+const STARS = Array.from({ length: 80 }, (_, i) => {
+  const left = (i * 37 + 13) % 100;
+  const top = (i * 73 + 29) % 100;
+  const size = (((i * 19) % 20) / 10 + 1).toFixed(1);
+  const opacity = (((i * 41) % 55 + 15) / 100).toFixed(2);
+  const dur = (((i * 31) % 35 + 20) / 10).toFixed(1);
+  return { left: `${left}%`, top: `${top}%`, size: `${size}px`, opacity, dur: `${dur}s` };
+});
 
 interface GameItem {
   href: string;
@@ -95,17 +105,17 @@ export default function HomePage() {
     <>
       {/* Background Starscape */}
       <div className="stars-bg" aria-hidden="true">
-        {Array.from({ length: 50 }).map((_, i) => (
+        {STARS.map((s, i) => (
           <div
             key={i}
             className="star"
             style={{
-              left: `${(i * 19.3) % 100}%`,
-              top: `${(i * 23.7) % 100}%`,
-              width: `${(i % 3) + 1.5}px`,
-              height: `${(i % 3) + 1.5}px`,
-              opacity: ((i % 5) + 3) * 0.1,
-              '--dur': `${(i % 4) + 2}s`,
+              left: s.left,
+              top: s.top,
+              width: s.size,
+              height: s.size,
+              opacity: s.opacity,
+              '--dur': s.dur,
             } as React.CSSProperties}
           />
         ))}
@@ -124,10 +134,18 @@ export default function HomePage() {
           <p className="hub-subtitle">
             Choose a game below to play immediately. Fully responsive on mobile, tablet, and desktop with smart AI opponents.
           </p>
+          <div style={{ marginTop: '1.25rem', display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
+            <a href="#stats" className="btn btn-secondary" style={{ padding: '0.5rem 1.25rem', fontSize: '0.875rem' }}>
+              📊 Voir les Statistiques ↓
+            </a>
+          </div>
         </div>
 
+        {/* Player Statistics Section */}
+        <PlayerStatsCards />
+
         {/* Responsive Game Cards Grid (1 col mobile, 2 col tablet, 4 col desktop) */}
-        <div className="games-grid">
+        <div id="games" className="games-grid" style={{ marginTop: '2.5rem' }}>
           {games.map((game) => (
             <Link
               key={game.href}

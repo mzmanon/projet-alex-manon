@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { pickRandomWord, isValidWord } from './words';
 import Confetti from '@/app/components/Confetti';
+import { recordGameResult } from '@/lib/stats';
 
 const WORD_LENGTH = 5;
 const MAX_GUESSES = 6;
@@ -105,12 +106,14 @@ export default function WordlePage() {
 
     const isWin = evaluated.every(l => l.state === 'correct');
     if (isWin) {
+      recordGameResult('wordle', 'win');
       setTimeout(() => {
         setWon(true);
         setGameOver(true);
         showMessage('🎉 Brilliant!', 3000);
       }, WORD_LENGTH * 150 + 300);
     } else if (newGuesses.length === MAX_GUESSES) {
+      recordGameResult('wordle', 'loss');
       setTimeout(() => {
         setGameOver(true);
         showMessage(`The word was ${target}`, 4000);

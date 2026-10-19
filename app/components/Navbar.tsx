@@ -139,61 +139,51 @@ export default function Navbar() {
             <span className="navbar-brand-name">GameHub</span>
           </Link>
 
-          <span className="navbar-separator" aria-hidden="true" />
+          <div className="navbar-separator" aria-hidden="true" />
 
-          {/* Professional Menu Dropdown Button */}
+          {/* Games Mega-Menu Trigger Button */}
           <button
             type="button"
             className={`navbar-games-trigger ${isOpen ? 'active' : ''}`}
-            onClick={() => setIsOpen((prev) => !prev)}
+            onClick={() => setIsOpen(!isOpen)}
             aria-expanded={isOpen}
-            aria-haspopup="true"
-            aria-label="Browse mini-games menu"
+            aria-haspopup="dialog"
+            aria-label="Toggle Games Library Menu"
           >
             <span className="trigger-icon-box">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="7" height="7" rx="1.5" />
-                <rect x="14" y="3" width="7" height="7" rx="1.5" />
-                <rect x="3" y="14" width="7" height="7" rx="1.5" />
-                <rect x="14" y="14" width="7" height="7" rx="1.5" />
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="7" height="7" />
+                <rect x="14" y="3" width="7" height="7" />
+                <rect x="14" y="14" width="7" height="7" />
+                <rect x="3" y="14" width="7" height="7" />
               </svg>
             </span>
             <span className="trigger-label">
-              {activeGame ? activeGame.name : 'Games'}
+              {activeGame ? activeGame.name : 'All Games'}
             </span>
-            <span className="trigger-chevron" aria-hidden="true">
-              <svg
-                width="12"
-                height="12"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={{
-                  transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                  transition: 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
-                }}
-              >
+            <span className={`trigger-chevron ${isOpen ? 'rotate' : ''}`}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="6 9 12 15 18 9" />
               </svg>
             </span>
           </button>
 
-          {/* Professional Mega-Dropdown Menu */}
+          {/* Mega-Menu Dropdown Popover */}
           {isOpen && (
-            <div className="mega-menu-popover" role="menu">
-              {/* Header Bar */}
+            <div
+              className="mega-menu-popover"
+              role="dialog"
+              aria-modal="false"
+              aria-label="Games Menu"
+            >
               <div className="mega-menu-header">
                 <div>
                   <h3 className="mega-menu-title">Select a Game</h3>
-                  <p className="mega-menu-subtitle">Play instantly in your browser</p>
+                  <p className="mega-menu-subtitle">Play instantly in your browser — zero installation</p>
                 </div>
-                <span className="mega-menu-count-badge">4 Games Available</span>
+                <span className="mega-menu-count-badge">4 Epic Games</span>
               </div>
 
-              {/* Games Grid (2 columns on wide, refined cards) */}
               <div className="mega-menu-grid">
                 {GAMES.map((game) => {
                   const isActive = pathname === game.href;
@@ -202,15 +192,13 @@ export default function Navbar() {
                       key={game.href}
                       href={game.href}
                       className={`mega-game-card ${isActive ? 'is-active' : ''}`}
-                      role="menuitem"
-                      onClick={() => setIsOpen(false)}
                       style={{
                         '--accent': game.accent,
                         '--accent-light': game.accentLight,
                         '--glow': game.bgGlow,
                       } as React.CSSProperties}
                     >
-                      <div className="card-icon-wrapper" style={{ color: game.accentLight, background: game.bgGlow }}>
+                      <div className="card-icon-wrapper" style={{ background: game.bgGlow, color: game.accentLight }}>
                         {game.iconSvg}
                       </div>
                       <div className="card-body">
@@ -224,27 +212,23 @@ export default function Navbar() {
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                               <circle cx="9" cy="7" r="4" />
+                              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                             </svg>
                             {game.players}
                           </span>
-                          <span className="card-arrow" aria-hidden="true">→</span>
+                          <span className="card-arrow">Play →</span>
                         </div>
                       </div>
-                      {isActive && <div className="card-active-indicator" />}
+                      {isActive && <span className="card-active-indicator" />}
                     </Link>
                   );
                 })}
               </div>
 
-              {/* Bottom Footer */}
               <div className="mega-menu-footer">
-                <Link
-                  href="/"
-                  className="mega-footer-home-btn"
-                  role="menuitem"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <Link href="/" className="mega-footer-home-btn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
                     <polyline points="9 22 9 12 15 12 15 22" />
                   </svg>
@@ -260,6 +244,14 @@ export default function Navbar() {
 
         {/* Right Section */}
         <div className="navbar-right-group">
+          <Link
+            href="/#stats"
+            className="nav-home-pill"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+          >
+            <span>📊</span>
+            <span>Stats</span>
+          </Link>
           {pathname !== '/' ? (
             <Link href="/" className="nav-home-pill">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
